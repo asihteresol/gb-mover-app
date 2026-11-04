@@ -1,0 +1,6 @@
+{
+  "name": "GBMovers - Bus Ticketing & Thermal Slip",
+  "description": "Mobile bus ticketing app for GBMovers featuring 80mm thermal receipt slip generation, print, and WhatsApp/social sharing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

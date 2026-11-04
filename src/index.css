@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: #f8fafc;
+    color: #0f172a;
+  }
+}
+
+.font-receipt {
+  font-family: 'Space Mono', 'Courier New', Courier, monospace;
+}
+
+/* 80mm Thermal Receipt Jagged Edge */
+.receipt-tear-top {
+  background: radial-gradient(circle at 6px 0, transparent 6px, #ffffff 6.5px);
+  background-size: 12px 12px;
+  background-repeat: repeat-x;
+}
+
+.receipt-tear-bottom {
+  background: radial-gradient(circle at 6px 12px, transparent 6px, #ffffff 6.5px);
+  background-size: 12px 12px;
+  background-repeat: repeat-x;
+}
+
+/* Specialized 80mm Thermal Print Media Styles */
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0mm !important;
+  }
+
+  /* Hide entire web app UI during print */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Make sure print container and thermal receipt are visible and positioned at top-left */
+  #thermal-print-container,
+  #thermal-print-container * {
+    visibility: visible;
+  }
+
+  #thermal-print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    min-width: 80mm !important;
+    margin: 0 !important;
+    padding: 2mm 3mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
