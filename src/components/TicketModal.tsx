@@ -167,7 +167,7 @@ Have a safe journey with GBMovers!`;
             </div>
 
             {/* The 80mm Slip */}
-            <div className="rounded-sm shadow-xl overflow-hidden">
+            <div className="rounded-sm shadow-xl overflow-visible">
               <ThermalSlip ticket={ticket} id="thermal-print-container" />
             </div>
           </div>
