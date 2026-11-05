@@ -49,7 +49,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({
 
       // Trigger browser download
       const link = document.createElement('a');
-      link.download = `GBMovers-Ticket-${ticket.ticketNo}.png`;
+      link.download = `${ticket.ticketNo}.png`;
       link.href = dataUrl;
       link.click();
 
@@ -69,13 +69,17 @@ Ticket No: ${ticket.ticketNo}
 Passenger: ${ticket.passengerName}${ticket.passengerCnic ? `\nCNIC: ${ticket.passengerCnic}` : ''}
 Route: ${ticket.fromCity} ➔ ${ticket.toCity}
 Bus Type: ${ticket.busType}
-Seat Number: ${ticket.seatNumber}
+Seat Number: ${ticket.seatNumber}${ticket.seatCount && ticket.seatCount > 1 ? ` (${ticket.seatCount} Seats)` : ''}
 Departure Date: ${ticket.departureDate}
 Departure Time: ${ticket.departureTime}
 Reporting Time: ${ticket.reportingTime || '15 mins before'}
 ━━━━━━━━━━━━━━━━━━━━━
-Standard Fare: Rs. ${ticket.fare.toLocaleString()}
-Discount: Rs. ${ticket.discount.toLocaleString()}
+${ticket.seatCount && ticket.seatCount > 1
+  ? `Fare per Seat: Rs. ${ticket.fare.toLocaleString()}
+Subtotal (${ticket.seatCount} seats): Rs. ${(ticket.subTotal || (ticket.fare * ticket.seatCount)).toLocaleString()}
+Discount per Seat: Rs. ${ticket.discount.toLocaleString()} (Total Discount: -Rs. ${(ticket.totalDiscount || (ticket.discount * ticket.seatCount)).toLocaleString()})`
+  : `Standard Fare: Rs. ${ticket.fare.toLocaleString()}
+Discount: Rs. ${ticket.discount.toLocaleString()}`}
 Total Paid: Rs. ${ticket.totalFare.toLocaleString()}
 ━━━━━━━━━━━━━━━━━━━━━
 Helpline: 0312-0000000 / 0313-0000000
@@ -167,7 +171,7 @@ Have a safe journey with GBMovers!`;
             </div>
 
             {/* The 80mm Slip */}
-            <div className="rounded-sm shadow-xl overflow-visible">
+            <div className="rounded-sm shadow-xl overflow-hidden">
               <ThermalSlip ticket={ticket} id="thermal-print-container" />
             </div>
           </div>

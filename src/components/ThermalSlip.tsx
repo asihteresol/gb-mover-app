@@ -98,7 +98,9 @@ export const ThermalSlip: React.FC<ThermalSlipProps> = ({ ticket, id = 'thermal-
 
         {/* Prominent Seat Number */}
         <div className="flex justify-between items-center bg-black text-white p-1 px-2 rounded-sm print:bg-black print:text-white">
-          <span className="font-bold text-[11px] tracking-wider">SEAT NO:</span>
+          <span className="font-bold text-[11px] tracking-wider">
+            {ticket.seatCount && ticket.seatCount > 1 ? `SEATS (${ticket.seatCount}):` : 'SEAT NO:'}
+          </span>
           <span className="font-extrabold text-[15px] tracking-widest">{ticket.seatNumber}</span>
         </div>
 
@@ -126,10 +128,29 @@ export const ThermalSlip: React.FC<ThermalSlipProps> = ({ ticket, id = 'thermal-
           FARE BREAKDOWN
         </div>
 
-        <div className="flex justify-between text-[11px]">
-          <span>Standard Fare:</span>
-          <span className="font-semibold">Rs. {ticket.fare.toLocaleString()}</span>
-        </div>
+        {ticket.seatCount && ticket.seatCount > 1 ? (
+          <>
+            <div className="flex justify-between text-[11px]">
+              <span>Fare Per Seat:</span>
+              <span className="font-semibold">Rs. {ticket.fare.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-[11px]">
+              <span>Total Seats:</span>
+              <span className="font-semibold">{ticket.seatCount} Seats</span>
+            </div>
+            <div className="flex justify-between text-[11px]">
+              <span>Subtotal:</span>
+              <span className="font-semibold">
+                Rs. {(ticket.subTotal || (ticket.fare * ticket.seatCount)).toLocaleString()}
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="flex justify-between text-[11px]">
+            <span>Standard Fare:</span>
+            <span className="font-semibold">Rs. {ticket.fare.toLocaleString()}</span>
+          </div>
+        )}
 
         {ticket.discount > 0 ? (
           <div className="flex justify-between text-[11px]">

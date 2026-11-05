@@ -24,13 +24,17 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
 👤 *Passenger:* ${ticket.passengerName}${ticket.passengerCnic ? `\n🪪 *CNIC:* ${ticket.passengerCnic}` : ''}
 🛣️ *Route:* ${ticket.fromCity} ➔ ${ticket.toCity}
 🚍 *Bus Type:* ${ticket.busType}
-💺 *Seat Number:* ${ticket.seatNumber}
+💺 *Seat Number:* ${ticket.seatNumber}${ticket.seatCount && ticket.seatCount > 1 ? ` (${ticket.seatCount} Seats)` : ''}
 📅 *Departure Date:* ${ticket.departureDate}
 ⏰ *Departure Time:* ${ticket.departureTime}
 ⏱️ *Reporting Time:* ${ticket.reportingTime || '15 mins before'}
 ━━━━━━━━━━━━━━━━━━━━━
-💰 *Fare:* Rs. ${ticket.fare.toLocaleString()}
-🏷️ *Discount:* Rs. ${ticket.discount.toLocaleString()}
+${ticket.seatCount && ticket.seatCount > 1
+  ? `💰 *Fare per Seat:* Rs. ${ticket.fare.toLocaleString()}
+🔢 *Subtotal (${ticket.seatCount} seats):* Rs. ${(ticket.subTotal || (ticket.fare * ticket.seatCount)).toLocaleString()}
+🏷️ *Discount per Seat:* Rs. ${ticket.discount.toLocaleString()} (Total: -Rs. ${(ticket.totalDiscount || (ticket.discount * ticket.seatCount)).toLocaleString()})`
+  : `💰 *Fare:* Rs. ${ticket.fare.toLocaleString()}
+🏷️ *Discount:* Rs. ${ticket.discount.toLocaleString()}`}
 💵 *Total Paid:* Rs. ${ticket.totalFare.toLocaleString()}
 ━━━━━━━━━━━━━━━━━━━━━
 📞 *GBMovers Helpline:*

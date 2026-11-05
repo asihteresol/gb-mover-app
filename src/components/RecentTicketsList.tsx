@@ -62,9 +62,11 @@ export const RecentTicketsList: React.FC<RecentTicketsListProps> = ({
           >
             {/* Left summary */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex flex-col items-center justify-center font-receipt font-bold text-xs shrink-0">
-                <span>{t.seatNumber}</span>
-                <span className="text-[8px] text-slate-400 font-sans uppercase">SEAT</span>
+              <div className="min-w-10 h-10 px-1 rounded-xl bg-slate-900 text-emerald-400 flex flex-col items-center justify-center font-receipt font-bold text-xs shrink-0">
+                <span className="truncate max-w-[50px]">{t.seatNumber}</span>
+                <span className="text-[7.5px] text-slate-400 font-sans uppercase">
+                  {t.seatCount && t.seatCount > 1 ? `${t.seatCount} SEATS` : 'SEAT'}
+                </span>
               </div>
 
               <div>

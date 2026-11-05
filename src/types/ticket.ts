@@ -12,7 +12,10 @@ export interface TicketData {
   fromCity: string;
   toCity: string;
   fare: number;
+  seatCount?: number;
+  subTotal?: number;
   discount: number;
+  totalDiscount?: number;
   totalFare: number;
   issueDate: string;
   issuedBy: string;

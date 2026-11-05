@@ -179,8 +179,19 @@ export default function App() {
     showToast('Form reset to defaults');
   };
 
-  // Calculated Net Total
-  const netTotalFare = Math.max(0, (fare || 0) - (discount || 0));
+  // Helper to calculate total seats booked (e.g., "14" -> 1, "14, 15" -> 2)
+  const getSeatCount = (seats: string): number => {
+    if (!seats || !seats.trim()) return 1;
+    const list = seats.includes(',')
+      ? seats.split(',').map((s) => s.trim()).filter(Boolean)
+      : seats.trim().split(/\s+/).filter(Boolean);
+    return Math.max(1, list.length);
+  };
+
+  const seatCount = getSeatCount(seatNumber);
+  const subTotalFare = (fare || 0) * seatCount;
+  const totalDiscount = (discount || 0) * seatCount;
+  const netTotalFare = Math.max(0, subTotalFare - totalDiscount);
 
   // Form submission: Generate 80mm thermal slip & open modal
   const handleGenerateSlip = (e: React.FormEvent) => {
@@ -231,6 +242,8 @@ export default function App() {
       busType,
       busName: busName === 'Other' ? customBusName || 'GB Express' : busName,
       seatNumber: seatNumber.trim(),
+      seatCount,
+      subTotal: subTotalFare,
       departureTime,
       departureDate: dateFormatted,
       passengerName: passengerName.trim(),
@@ -240,6 +253,7 @@ export default function App() {
       toCity: toCity.trim(),
       fare: Number(fare),
       discount: Number(discount) || 0,
+      totalDiscount,
       totalFare: netTotalFare,
       issueDate: new Date().toLocaleString('en-GB', {
         day: '2-digit',
@@ -483,9 +497,14 @@ export default function App() {
                 {/* Seat Number with Visual Map Picker */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1">
+                    <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1.5">
                       <Armchair className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Seat Number *</span>
+                      {seatCount > 1 && (
+                        <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                          {seatCount} Seats Selected
+                        </span>
+                      )}
                     </label>
 
                     <button
@@ -517,23 +536,42 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Quick Seat Chips */}
+                  {/* Quick Seat Chips (supports clicking to add multiple seats) */}
                   <div className="flex items-center gap-1.5 mt-2 overflow-x-auto py-1">
                     <span className="text-[11px] text-slate-400 font-medium">Quick Pick:</span>
-                    {['01', '04', '08', '14', '15', '21', '25', '32'].map((sn) => (
-                      <button
-                        key={sn}
-                        type="button"
-                        onClick={() => setSeatNumber(sn)}
-                        className={`text-xs px-2 py-0.5 rounded font-receipt transition-colors cursor-pointer ${
-                          seatNumber === sn
-                            ? 'bg-slate-900 text-emerald-400 font-bold'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        {sn}
-                      </button>
-                    ))}
+                    {['01', '04', '08', '14', '15', '21', '25', '32'].map((sn) => {
+                      const isSelected = seatNumber
+                        .split(',')
+                        .map((s) => s.trim())
+                        .includes(sn);
+                      return (
+                        <button
+                          key={sn}
+                          type="button"
+                          onClick={() => {
+                            const list = seatNumber
+                              ? seatNumber
+                                  .split(',')
+                                  .map((s) => s.trim())
+                                  .filter(Boolean)
+                              : [];
+                            if (list.includes(sn)) {
+                              const remaining = list.filter((s) => s !== sn);
+                              setSeatNumber(remaining.join(', '));
+                            } else {
+                              setSeatNumber(list.length > 0 ? [...list, sn].join(', ') : sn);
+                            }
+                          }}
+                          className={`text-xs px-2.5 py-1 rounded-md font-receipt transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'bg-slate-900 text-emerald-400 font-bold shadow-xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {sn}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -663,7 +701,7 @@ export default function App() {
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
                       <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Fare (PKR) *</span>
+                      <span>Fare per Seat (PKR) *</span>
                     </label>
                     <input
                       type="number"
@@ -675,12 +713,17 @@ export default function App() {
                       placeholder="e.g. 4200"
                       className="w-full h-11 px-3 text-sm font-bold bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
                     />
+                    {seatCount > 1 && (
+                      <div className="text-[11px] text-emerald-800 font-semibold mt-1">
+                        ✓ {seatCount} Seats × Rs. {(fare || 0).toLocaleString()} = Rs. {subTotalFare.toLocaleString()}
+                      </div>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
                       <Tag className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Discount (PKR)</span>
+                      <span>Discount per Seat (PKR)</span>
                     </label>
                     <input
                       type="number"
@@ -691,18 +734,38 @@ export default function App() {
                       placeholder="e.g. 200"
                       className="w-full h-11 px-3 text-sm font-bold bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
                     />
+                    {seatCount > 1 && (discount || 0) > 0 && (
+                      <div className="text-[11px] text-amber-800 font-semibold mt-1">
+                        ✓ {seatCount} Seats × Rs. {(discount || 0).toLocaleString()} = Rs. {totalDiscount.toLocaleString()} Total Discount
+                      </div>
+                    )}
                   </div>
 
                   {/* Calculated Net Total */}
                   <div className="sm:col-span-2 pt-2 border-t border-slate-200 flex items-center justify-between">
                     <div>
                       <span className="text-xs text-slate-500 font-medium">Net Total Payable:</span>
-                      <div className="text-xs text-slate-400">
-                        Rs. {(fare || 0).toLocaleString()} - Rs. {(discount || 0).toLocaleString()}
+                      <div className="text-xs text-slate-500">
+                        {seatCount > 1 ? (
+                          <span>
+                            {seatCount} seats × (Rs. {(fare || 0).toLocaleString()} - Rs. {(discount || 0).toLocaleString()}) = Rs. {netTotalFare.toLocaleString()}
+                          </span>
+                        ) : (
+                          <span>
+                            Rs. {(fare || 0).toLocaleString()} - Rs. {(discount || 0).toLocaleString()}
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <div className="text-xl font-extrabold text-emerald-700 font-receipt">
-                      Rs. {netTotalFare.toLocaleString()}
+                    <div className="text-right">
+                      {totalDiscount > 0 && (
+                        <div className="text-xs text-slate-400 line-through">
+                          Rs. {subTotalFare.toLocaleString()}
+                        </div>
+                      )}
+                      <div className="text-xl font-extrabold text-emerald-700 font-receipt">
+                        Rs. {netTotalFare.toLocaleString()}
+                      </div>
                     </div>
                   </div>
                 </div>
